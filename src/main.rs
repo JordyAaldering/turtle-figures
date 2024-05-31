@@ -13,8 +13,8 @@ struct Model {
 }
 
 struct Settings {
-    angle0: f32,
-    angle1: f32,
+    angle0: u32,
+    angle1: u32,
 }
 
 fn main() {
@@ -32,15 +32,15 @@ fn model(app: &App) -> Model {
     let egui = Egui::from_window(&window);
 
     let mut seq = Seq::new(0, doubling);
-    let points = update_points(&mut seq, 140.0, 280.0);
+    let points = update_points(&mut seq, 140, 280);
 
     Model {
         seq,
         points,
         egui,
         settings: Settings {
-            angle0: 140.0,
-            angle1: 280.0,
+            angle0: 140,
+            angle1: 280,
         },
     }
 }
@@ -55,12 +55,12 @@ fn update(_app: &App, model: &mut Model, update: Update) {
         .show(&ctx, |ui| {
             ui.label("Angle 0:");
             let changed0 = ui
-                .add(egui::Slider::new(&mut settings.angle0, 0.0..=360.0))
+                .add(egui::Slider::new(&mut settings.angle0, 0..=360))
                 .changed();
 
             ui.label("Angle 1:");
             let changed1 = ui
-                .add(egui::Slider::new(&mut settings.angle1, 0.0..=360.0))
+                .add(egui::Slider::new(&mut settings.angle1, 0..=360))
                 .changed();
 
             changed0 || changed1
@@ -90,17 +90,17 @@ fn view(app: &App, model: &Model, frame: Frame) {
     model.egui.draw_to_frame(&frame).unwrap();
 }
 
-fn update_points(seq: &mut Seq<i32>, angle0: f32, angle1: f32) -> Vec<Point2> {
+fn update_points(seq: &mut Seq<i32>, angle0: u32, angle1: u32) -> Vec<Point2> {
     let radians = seq_to_radians(seq, angle0, angle1);
     let points = rad_to_points(radians);
     points.collect()
 }
 
-fn seq_to_radians(seq: &mut Seq<i32>, angle0: f32, angle1: f32) -> impl Iterator<Item = f32> + '_ {
+fn seq_to_radians(seq: &mut Seq<i32>, angle0: u32, angle1: u32) -> impl Iterator<Item = f32> + '_ {
     const DEG2RAD: f32 = (PI * 2.0) / 360.0;
-    seq.take(9216).iter().scan(0.0, move |angle, &x| {
+    seq.take(9216).iter().scan(0, move |angle, &x| {
         *angle += if x == 0 { angle0 } else { angle1 };
-        Some(*angle * DEG2RAD)
+        Some((*angle as f32) * DEG2RAD)
     })
 }
 
